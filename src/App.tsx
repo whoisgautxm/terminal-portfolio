@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TerminalOutput } from './components/TerminalOutput';
 import { DATA } from './data/resume';
+import { useTheme } from './context/ThemeContext';
+import { MatrixRain } from './components/MatrixRain';
+import { ThemeSwitcher } from './components/ThemeSwitcher';
 
 interface HistoryItem {
   command: string;
@@ -49,6 +52,16 @@ function App() {
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const bootStarted = useRef(false); // prevent double-run
+  const { crtEnabled, matrixEnabled } = useTheme();
+
+  // CRT Effect toggling on body
+  useEffect(() => {
+    if (crtEnabled) {
+      document.body.classList.add('crt-enabled');
+    } else {
+      document.body.classList.remove('crt-enabled');
+    }
+  }, [crtEnabled]);
 
   // Boot sequence — guarded with a ref so it runs exactly once
   useEffect(() => {
@@ -115,91 +128,95 @@ function App() {
   };
 
   return (
-    <div className="terminal-window" onClick={handleContainerClick}>
-      {/* ── Title Bar ── */}
-      <div className="terminal-titlebar">
-        <div className="titlebar-dots">
-          <div className="dot dot-red" />
-          <div className="dot dot-yellow" />
-          <div className="dot dot-green" />
-        </div>
-        <span className="titlebar-title">gautam@portfolio — bash — 80×24</span>
-        <div className="terminal-status">
-          <div className="status-dot" />
-          <span>ONLINE</span>
-        </div>
-      </div>
-
-      {/* ── Terminal Body ── */}
-      <div className="terminal-body">
-        {/* Boot sequence lines */}
-        {bootLines.length > 0 && (
-          <div className="boot-sequence" style={{ marginBottom: booting ? 0 : '24px' }}>
-            {bootLines.map((line, i) => (
-              <div key={i} className={`boot-line ${line.type}`}>
-                {line.text}
-              </div>
-            ))}
-            {booting && <span className="cursor" />}
+    <>
+      {matrixEnabled && <MatrixRain />}
+      <ThemeSwitcher />
+      <div className="terminal-window" onClick={handleContainerClick}>
+        {/* ── Title Bar ── */}
+        <div className="terminal-titlebar">
+          <div className="titlebar-dots">
+            <div className="dot dot-red" />
+            <div className="dot dot-yellow" />
+            <div className="dot dot-green" />
           </div>
-        )}
+          <span className="titlebar-title">gautam@portfolio — bash — 80×24</span>
+          <div className="terminal-status">
+            <div className="status-dot" />
+            <span>ONLINE</span>
+          </div>
+        </div>
 
-        {/* Main interface — shown after boot */}
-        {!booting && (
-          <>
-            {/* ASCII name banner */}
-            <div className="welcome-banner">
-              <pre className="ascii-name">{ASCII_BANNER}</pre>
-              <p className="welcome-tagline">
-                ZK Engineer · IIT Delhi · whoisgautxm@gmail.com
-              </p>
-            </div>
-
-            {/* Command history */}
-            {history.map((item, idx) => (
-              <div key={idx} className="history-block">
-                <div className="prompt-line">
-                  <span className="prompt-user">gautam</span>
-                  <span className="prompt-at">@</span>
-                  <span className="prompt-host">portfolio</span>
-                  <span className="prompt-colon">:</span>
-                  <span className="prompt-path">~</span>
-                  <span className="prompt-dollar">$</span>
-                  <span className="prompt-cmd">{item.command}</span>
-                  <span className="prompt-time">[{item.timestamp}]</span>
+        {/* ── Terminal Body ── */}
+        <div className="terminal-body">
+          {/* Boot sequence lines */}
+          {bootLines.length > 0 && (
+            <div className="boot-sequence" style={{ marginBottom: booting ? 0 : '24px' }}>
+              {bootLines.map((line, i) => (
+                <div key={i} className={`boot-line ${line.type}`}>
+                  {line.text}
                 </div>
-                <TerminalOutput command={item.command} />
+              ))}
+              {booting && <span className="cursor" />}
+            </div>
+          )}
+
+          {/* Main interface — shown after boot */}
+          {!booting && (
+            <>
+              {/* ASCII name banner */}
+              <div className="welcome-banner">
+                <pre className="ascii-name">{ASCII_BANNER}</pre>
+                <p className="welcome-tagline">
+                  ZK Engineer · IIT Delhi · whoisgautxm@gmail.com
+                </p>
               </div>
-            ))}
 
-            {/* Live input prompt */}
-            <form onSubmit={handleSubmit} className="input-wrapper">
-              <span className="prompt-user">gautam</span>
-              <span className="prompt-at">@</span>
-              <span className="prompt-host">portfolio</span>
-              <span className="prompt-colon">:</span>
-              <span className="prompt-path">~</span>
-              <span className="prompt-dollar">$</span>
-              <input
-                ref={inputRef}
-                type="text"
-                className="terminal-input"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                autoComplete="off"
-                spellCheck={false}
-                autoFocus
-                placeholder=""
-              />
-              {!input && <span className="cursor" />}
-            </form>
-          </>
-        )}
+              {/* Command history */}
+              {history.map((item, idx) => (
+                <div key={idx} className="history-block">
+                  <div className="prompt-line">
+                    <span className="prompt-user">gautam</span>
+                    <span className="prompt-at">@</span>
+                    <span className="prompt-host">portfolio</span>
+                    <span className="prompt-colon">:</span>
+                    <span className="prompt-path">~</span>
+                    <span className="prompt-dollar">$</span>
+                    <span className="prompt-cmd">{item.command}</span>
+                    <span className="prompt-time">[{item.timestamp}]</span>
+                  </div>
+                  <TerminalOutput command={item.command} />
+                </div>
+              ))}
 
-        <div ref={bottomRef} />
+              {/* Live input prompt */}
+              <form onSubmit={handleSubmit} className="input-wrapper">
+                <span className="prompt-user">gautam</span>
+                <span className="prompt-at">@</span>
+                <span className="prompt-host">portfolio</span>
+                <span className="prompt-colon">:</span>
+                <span className="prompt-path">~</span>
+                <span className="prompt-dollar">$</span>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  className="terminal-input"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  autoComplete="off"
+                  spellCheck={false}
+                  autoFocus
+                  placeholder=""
+                />
+                {!input && <span className="cursor" />}
+              </form>
+            </>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

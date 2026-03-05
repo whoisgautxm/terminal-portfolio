@@ -1,22 +1,26 @@
 import React from 'react';
 import { DATA } from '../data/resume';
+import { useTheme, type ThemeName } from '../context/ThemeContext';
 
 interface TerminalOutputProps {
     command: string;
 }
 
 export const TerminalOutput: React.FC<TerminalOutputProps> = ({ command }) => {
+    const { theme, setTheme, matrixEnabled, setMatrixEnabled } = useTheme();
 
     const renderOutput = () => {
         const cmd = command.trim().toLowerCase();
+        const args = cmd.split(' ');
+        const baseCmd = args[0];
 
-        switch (cmd) {
+        switch (baseCmd) {
             case 'help':
                 return (
                     <div className="cmd-output">
                         <p className="section-heading">Available Commands</p>
                         <div className="help-grid">
-                            {['about', 'skills', 'projects', 'hackathons', 'education', 'contact', 'clear'].map(c => (
+                            {['about', 'skills', 'projects', 'hackathons', 'education', 'contact', 'theme', 'matrix', 'clear'].map(c => (
                                 <div key={c} className="help-item">$ {c}</div>
                             ))}
                         </div>
@@ -134,6 +138,63 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({ command }) => {
                                 <a href={DATA.contact.social.X} target="_blank" rel="noreferrer" className="contact-link">{DATA.contact.social.X}</a>
                             </div>
                         </div>
+                    </div>
+                );
+
+            case 'matrix':
+                setTimeout(() => setMatrixEnabled(!matrixEnabled), 0); // Defer state update to avoid rendering issues
+                return (
+                    <div className="cmd-output">
+                        <p style={{ color: 'var(--green)' }}>
+                            Matrix rain has been {matrixEnabled ? 'DISABLED' : 'ENABLED'}.
+                        </p>
+                    </div>
+                );
+
+            case 'theme':
+                if (args.length === 1) {
+                    return (
+                        <div className="cmd-output">
+                            <p style={{ color: 'var(--white)' }}>Current theme: <span style={{ color: 'var(--green)', fontWeight: 'bold' }}>{theme}</span></p>
+                            <p style={{ color: 'var(--muted)', fontSize: '12px', marginTop: '8px' }}>Use 'theme ls' to list themes, or 'theme set &lt;name&gt;' to change it.</p>
+                        </div>
+                    );
+                } else if (args[1] === 'ls') {
+                    return (
+                        <div className="cmd-output">
+                            <p className="section-heading">Available Themes</p>
+                            <ul style={{ listStyleType: 'none', padding: 0, margin: '8px 0', color: 'var(--white)' }}>
+                                <li>- hack <span style={{ color: 'var(--muted)' }}>(Classic Green)</span></li>
+                                <li>- dracula <span style={{ color: 'var(--muted)' }}>(Dark Pink/Purple)</span></li>
+                                <li>- cyberpunk <span style={{ color: 'var(--muted)' }}>(Neon Yellow/Cyan)</span></li>
+                                <li>- synthwave <span style={{ color: 'var(--muted)' }}>(Neon Magenta/Blue)</span></li>
+                                <li>- light <span style={{ color: 'var(--muted)' }}>(Clean White/Teal)</span></li>
+                            </ul>
+                        </div>
+                    );
+                } else if (args[1] === 'set' && args[2]) {
+                    const newTheme = args[2] as ThemeName;
+                    const validThemes: ThemeName[] = ['hack', 'dracula', 'cyberpunk', 'synthwave', 'light'];
+
+                    if (validThemes.includes(newTheme)) {
+                        setTimeout(() => setTheme(newTheme), 0);
+                        return (
+                            <div className="cmd-output">
+                                <p style={{ color: 'var(--green)' }}>Theme successfully changed to '{newTheme}'.</p>
+                            </div>
+                        );
+                    } else {
+                        return (
+                            <div className="cmd-output">
+                                <p className="cmd-error">Invalid theme name: <span>{newTheme}</span>.</p>
+                                <p style={{ color: 'var(--muted)', fontSize: '12px' }}>Use 'theme ls' to see available options.</p>
+                            </div>
+                        );
+                    }
+                }
+                return (
+                    <div className="cmd-output">
+                        <p className="cmd-error">Invalid usage of 'theme' command.</p>
                     </div>
                 );
 
