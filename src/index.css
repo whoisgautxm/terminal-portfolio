@@ -1,0 +1,635 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+@import "tailwindcss";
+
+/* ============================================
+   ROOT VARIABLES — Terminal Color Palette
+   ============================================ */
+:root {
+  --bg: #0d0f0f;
+  --bg-surface: #111414;
+  --bg-header: #0a0c0c;
+  --green: #00ff41;
+  --green-dim: #00c832;
+  --green-muted: #1a4a1a;
+  --green-glow: rgba(0, 255, 65, 0.15);
+  --blue: #4fc3f7;
+  --cyan: #00e5ff;
+  --yellow: #ffea00;
+  --red: #ff3d3d;
+  --white: #e8f5e9;
+  --muted: #4a7a4a;
+  --border: rgba(0, 255, 65, 0.15);
+  --scanline: rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   GLOBAL RESET & BASE
+   ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--green);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* Subtle CRT scanlines overlay */
+  background-image:
+    repeating-linear-gradient(0deg,
+      var(--scanline) 0px,
+      var(--scanline) 1px,
+      transparent 1px,
+      transparent 4px);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--green-muted);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--green-dim);
+}
+
+/* ============================================
+   TERMINAL WINDOW
+   ============================================ */
+.terminal-window {
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 0 40px rgba(0, 255, 65, 0.08),
+    inset 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Title bar (fake macOS/Linux bar) */
+.terminal-titlebar {
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.titlebar-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot-red {
+  background: #ff5f57;
+  box-shadow: 0 0 4px #ff5f57;
+}
+
+.dot-yellow {
+  background: #ffbd2e;
+  box-shadow: 0 0 4px #ffbd2e;
+}
+
+.dot-green {
+  background: #28ca41;
+  box-shadow: 0 0 4px #28ca41;
+}
+
+.titlebar-title {
+  flex: 1;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.terminal-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   TERMINAL BODY
+   ============================================ */
+.terminal-body {
+  flex: 1;
+  padding: 24px;
+  background: var(--bg-surface);
+  overflow-y: auto;
+}
+
+/* ============================================
+   BOOT SEQUENCE
+   ============================================ */
+.boot-sequence {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.boot-line {
+  color: var(--muted);
+  font-size: 13px;
+  animation: fadeSlideIn 0.2s ease forwards;
+}
+
+.boot-line.highlight {
+  color: var(--green);
+}
+
+.boot-line.success::before {
+  content: '[ OK ] ';
+  color: var(--green);
+}
+
+.boot-line.info::before {
+  content: '[ .. ] ';
+  color: var(--blue);
+}
+
+/* ============================================
+   WELCOME BANNER (ASCII-style)
+   ============================================ */
+.welcome-banner {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.ascii-name {
+  color: var(--green);
+  font-size: 13px;
+  white-space: pre;
+  line-height: 1.2;
+  text-shadow: 0 0 10px var(--green);
+}
+
+.welcome-tagline {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* ============================================
+   HISTORY + PROMPT
+   ============================================ */
+.history-block {
+  margin-bottom: 20px;
+}
+
+.prompt-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.prompt-user {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.prompt-at {
+  color: var(--muted);
+}
+
+.prompt-host {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.prompt-colon {
+  color: var(--muted);
+}
+
+.prompt-path {
+  color: var(--blue);
+}
+
+.prompt-dollar {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.prompt-cmd {
+  color: var(--white);
+  margin-left: 4px;
+}
+
+.prompt-time {
+  color: var(--muted);
+  font-size: 11px;
+  margin-left: auto;
+  opacity: 0.6;
+}
+
+/* Input line */
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.terminal-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--white);
+  font-family: inherit;
+  font-size: 14px;
+  flex: 1;
+  min-width: 120px;
+  caret-color: var(--green);
+}
+
+/* ============================================
+   COMMAND OUTPUT — generic wrapper
+   ============================================ */
+.cmd-output {
+  margin-top: 10px;
+  padding-left: 8px;
+  border-left: 2px solid var(--green-muted);
+  animation: fadeSlideIn 0.25s ease forwards;
+}
+
+/* ============================================
+   HELP OUTPUT
+   ============================================ */
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.help-item {
+  background: var(--green-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 12px;
+  color: var(--green);
+  font-size: 13px;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.help-item:hover {
+  background: rgba(0, 255, 65, 0.1);
+  box-shadow: 0 0 8px var(--green-glow);
+}
+
+/* ============================================
+   ABOUT OUTPUT
+   ============================================ */
+.about-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--green);
+  text-shadow: 0 0 12px var(--green);
+  margin-bottom: 4px;
+}
+
+.about-location {
+  color: var(--cyan);
+  font-size: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.about-location::before {
+  content: '📍';
+}
+
+.about-desc {
+  color: var(--white);
+  line-height: 1.8;
+  max-width: 680px;
+  font-size: 13px;
+}
+
+.about-summary {
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 680px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* ============================================
+   SKILLS OUTPUT
+   ============================================ */
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.skill-badge {
+  background: transparent;
+  border: 1px solid var(--green);
+  border-radius: 4px;
+  padding: 5px 14px;
+  color: var(--green);
+  font-size: 13px;
+  transition: all 0.2s;
+  box-shadow: 0 0 0 transparent;
+}
+
+.skill-badge:hover {
+  background: var(--green);
+  color: var(--bg);
+  box-shadow: 0 0 14px var(--green);
+}
+
+/* ============================================
+   PROJECT / HACKATHON CARDS
+   ============================================ */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.card {
+  background: var(--bg-header);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 18px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: var(--green-dim);
+  box-shadow: 0 0 14px var(--green-glow);
+}
+
+.card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.card-title {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.card-date {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.card-desc {
+  color: var(--white);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.card-stack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.stack-label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.stack-tag {
+  background: var(--green-muted);
+  color: var(--green);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cyan);
+  font-size: 12px;
+  text-decoration: none;
+  border: 1px solid var(--cyan);
+  padding: 3px 10px;
+  border-radius: 3px;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.card-link:hover {
+  background: rgba(79, 195, 247, 0.1);
+  box-shadow: 0 0 8px rgba(79, 195, 247, 0.3);
+}
+
+/* ============================================
+   EDUCATION OUTPUT
+   ============================================ */
+.edu-card {
+  background: var(--bg-header);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 18px;
+}
+
+.edu-school {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.edu-degree {
+  color: var(--white);
+  font-size: 13px;
+}
+
+.edu-years {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ============================================
+   CONTACT OUTPUT
+   ============================================ */
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.contact-label {
+  color: var(--muted);
+  min-width: 100px;
+}
+
+.contact-value {
+  color: var(--green);
+}
+
+.contact-link {
+  color: var(--cyan);
+  text-decoration: none;
+  transition: text-shadow 0.2s;
+}
+
+.contact-link:hover {
+  text-shadow: 0 0 8px var(--cyan);
+}
+
+/* ============================================
+   ERROR + NOT FOUND
+   ============================================ */
+.cmd-error {
+  color: var(--red);
+  font-size: 13px;
+}
+
+.cmd-error span {
+  color: var(--yellow);
+}
+
+/* ============================================
+   SECTION HEADING
+   ============================================ */
+.section-heading {
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ============================================
+   BLINKING CURSOR
+   ============================================ */
+.cursor {
+  display: inline-block;
+  width: 9px;
+  height: 16px;
+  background: var(--green);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+  box-shadow: 0 0 6px var(--green);
+  margin-left: 2px;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 2px var(--green);
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
